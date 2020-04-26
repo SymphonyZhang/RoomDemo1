@@ -29,9 +29,10 @@ class MainActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
+        viewModel = ViewModelProvider(this,ViewModelProvider.NewInstanceFactory()).get(WordViewModel::class.java)
         recyclerView = findViewById(R.id.recyclerView)
-        wordAdapter1 = WordAdapter(false)
-        wordAdapter2 = WordAdapter(true)
+        wordAdapter1 = WordAdapter(false,viewModel)
+        wordAdapter2 = WordAdapter(true,viewModel)
         recyclerView.layoutManager = LinearLayoutManager(this)
         recyclerView.adapter = wordAdapter1
 
@@ -43,16 +44,18 @@ class MainActivity : AppCompatActivity() {
             }
         }
 
-        viewModel = ViewModelProvider(this,ViewModelProvider.NewInstanceFactory()).get(WordViewModel::class.java)
         //userViewModel = ViewModelProvider(this,ViewModelProvider.NewInstanceFactory()).get(UserViewModel::class.java)
 
 
 
         viewModel.allWordsLive.observe(this, Observer {
+            var temp = wordAdapter1.itemCount
             wordAdapter1.allWords = it
             wordAdapter2.allWords = it
-            wordAdapter1.notifyDataSetChanged()
-            wordAdapter2.notifyDataSetChanged()
+            if(temp != it.size) {
+                wordAdapter1.notifyDataSetChanged()
+                wordAdapter2.notifyDataSetChanged()
+            }
         })
 
         /*userViewModel.allUsers.observe(this, Observer {
